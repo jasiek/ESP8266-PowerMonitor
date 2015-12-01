@@ -1,0 +1,2 @@
+#define WIFI_SSID "telemetry"
+#define WIFI_PASS "telemetry"
