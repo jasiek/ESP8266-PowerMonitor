@@ -3,7 +3,9 @@
 #include <WiFiClientSecure.h>
 #include "settings.h"
 
-int counter;
+volatile int counter;
+volatile unsigned long pulseStartTime;
+volatile unsigned long pulseWidth;
 
 void setup() {
   Serial.begin(115200);
@@ -20,19 +22,26 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   // When there's a pulse, increment the counter.
-  pinMode(16, INPUT_PULLUP);
-  attachInterrupt(16, pulse_ISR, RISING);
+  pulseStartTime = millis();
+  pinMode(15, INPUT);
+  attachInterrupt(15, pulse_CHANGE, CHANGE);
 }
 
 void loop() {
-  noInterrupts();
-
-  counter = 0;
-  interrupts();
-  delay(5 * 60 * 1000); // every 5 minutes
+  delay(1000);
+  Serial.print(counter);
 }
 
-void pulse_ISR(void) {
-  counter++;
+void pulse_CHANGE() {
+  // are we rising or falling?
+  unsigned long now = millis();
+  if (digitalRead(15) == 1) {
+    // rising
+    pulseStartTime = now;
+  } else {
+    // falling
+    pulseWidth = now - pulseStartTime;
+    if (pulseWidth > 80) counter++;
+  }
 }
 
