@@ -3,9 +3,9 @@
 #include <WiFiClientSecure.h>
 #include "settings.h"
 
-volatile int counter;
-volatile unsigned long pulseStartTime;
-volatile unsigned long pulseWidth;
+int counter;
+unsigned long pulseStartTime;
+unsigned long pulseWidth;
 
 void setup() {
   Serial.begin(115200);
@@ -29,19 +29,24 @@ void setup() {
 
 void loop() {
   delay(1000);
-  Serial.print(counter);
+  Serial.println(counter);
 }
 
 void pulse_CHANGE() {
   // are we rising or falling?
   unsigned long now = millis();
+  Serial.println(now);
   if (digitalRead(15) == 1) {
     // rising
     pulseStartTime = now;
   } else {
     // falling
     pulseWidth = now - pulseStartTime;
-    if (pulseWidth > 80) counter++;
+    if (pulseWidth > 80 && pulseWidth < 100) {
+      // workaround?
+      pulseStartTime = now;
+      counter++;
+    }
   }
 }
 
