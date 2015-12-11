@@ -28,6 +28,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
+LIBS:ESP8266-PowerMonitor-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -97,7 +98,7 @@ F 3 "" H 8000 4000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	7800 3400 7650 3400
+	7400 3400 7800 3400
 Wire Wire Line
 	7650 3400 7650 3550
 Wire Wire Line
@@ -127,4 +128,66 @@ F 3 "" H 6800 4300 60  0000 C CNN
 $EndComp
 Text Notes 6450 4300 0    60   ~ 0
 I2C
+$Comp
+L CONN_01X03 P5
+U 1 1 566A8677
+P 8000 4700
+F 0 "P5" H 8000 4900 50  0000 C CNN
+F 1 "CONN_01X03" V 8100 4700 50  0000 C CNN
+F 2 "" H 8000 4700 60  0000 C CNN
+F 3 "" H 8000 4700 60  0000 C CNN
+	1    8000 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7000 3300 7450 3300
+Wire Wire Line
+	7450 3300 7450 5000
+Wire Wire Line
+	7450 4600 7800 4600
+Wire Wire Line
+	7400 3400 7400 5200
+Wire Wire Line
+	7400 4700 7800 4700
+Connection ~ 7650 3400
+Wire Wire Line
+	7000 3400 7350 3400
+Wire Wire Line
+	7350 3400 7350 4800
+Wire Wire Line
+	7350 4800 7800 4800
+Text Notes 8150 4650 0    60   ~ 0
+GND
+Text Notes 8150 4750 0    60   ~ 0
+3.3V\n
+Text Notes 8150 4850 0    60   ~ 0
+5V
+Wire Wire Line
+	7000 4100 7450 4100
+Connection ~ 7450 4100
+Wire Wire Line
+	7000 4400 7400 4400
+Connection ~ 7400 4400
+Wire Wire Line
+	7000 4500 7350 4500
+Connection ~ 7350 4500
+$Comp
+L CONN_01X03 P?
+U 1 1 566A8D76
+P 6800 5100
+F 0 "P?" H 6800 5300 50  0000 C CNN
+F 1 "CONN_01X03" V 6900 5100 50  0000 C CNN
+F 2 "" H 6800 5100 60  0000 C CNN
+F 3 "" H 6800 5100 60  0000 C CNN
+	1    6800 5100
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7400 5200 7000 5200
+Connection ~ 7400 4700
+Wire Wire Line
+	7450 5000 7000 5000
+Connection ~ 7450 4600
+Text Notes 6350 5150 0    60   ~ 0
+1Wire
 $EndSCHEMATC

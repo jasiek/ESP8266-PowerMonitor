@@ -125,4 +125,6 @@ F 3 "" H 6800 4300 60  0000 C CNN
 	1    6800 4300
 	-1   0    0    -1  
 $EndComp
+Text Notes 6450 4300 0    60   ~ 0
+I2C
 $EndSCHEMATC
