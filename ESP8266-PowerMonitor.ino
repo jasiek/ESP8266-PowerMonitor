@@ -13,8 +13,9 @@ unsigned int energyCounter;
 unsigned long pulseStartTime;
 unsigned long pulseWidth;
 
-void pulse_CHANGE();
+void recordPulse();
 void recordMovement();
+void report();
 
 void setup() {
   Serial.begin(115200);
@@ -34,25 +35,22 @@ void setup() {
   pulseStartTime = millis();
   pinMode(5, INPUT);
   pinMode(15, INPUT);
-  attachInterrupt(15, pulse_CHANGE, CHANGE);
+  attachInterrupt(15, recordPulse, CHANGE);
   attachInterrupt(5, recordMovement, RISING);
 }
 
 void loop() {
-  Serial.println(millis());
-  Serial.println(energyCounter);
-  Serial.println(movementCounter);
   sensors.requestTemperatures();
   delay(1000);
-  Serial.println(sensors.getTempCByIndex(0));
-  Serial.println();
+  report();
+  delay(5 * 60 * 1000);
 }
 
 void recordMovement() {
   movementCounter++;
 }
 
-void pulse_CHANGE() {
+void recordPulse() {
   // are we rising or falling?
   unsigned long now = millis();
   if (digitalRead(15) == 1) {
@@ -69,6 +67,37 @@ void pulse_CHANGE() {
   }
 }
 
-float readTemperature() {
+void report() {
+  float temp = sensors.getTempCByIndex(0);
+  String url = String(DATA_PATH) + "&temp=" + String(temp) + "&moves=" + String(movementCounter) + "&pulses=" + String(energyCounter);
+  
+  WiFiClientSecure client;
+  if (client.connect(DATA_HOST, DATA_PORT)) {
+      client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+      "Host: data.sparkfun.com\r\n" +
+      "User-Agent: ESP8266-PowerMonitor\r\n" +
+      "Connection: close\r\n\r\n");
+       Serial.println("Sent request");
+  
+      bool success = false;
+  
+      while (client.connected()) {
+        String line = client.readStringUntil('\n');
+        if (line.startsWith("1 success")) {
+          success = true;
+          break;
+        }
+      }
+      if (success) {
+        energyCounter = 0;
+        movementCounter = 0; 
+        Serial.println("Data sent successfully");
+      } else {
+        Serial.println("An error occured");
+      }
+    } else {
+      Serial.println("Could not connect, will try later");
+    }
 }
+
 
