@@ -10,6 +10,7 @@ DallasTemperature sensors(&bus);
 
 unsigned int movementCounter;
 unsigned int energyCounter;
+unsigned int errorCount;
 unsigned long pulseStartTime;
 unsigned long pulseWidth;
 
@@ -69,7 +70,10 @@ void recordPulse() {
 
 void report() {
   float temp = sensors.getTempCByIndex(0);
-  String url = String(DATA_PATH) + "&temp=" + String(temp) + "&moves=" + String(movementCounter) + "&pulses=" + String(energyCounter);
+  String url = String(DATA_PATH) + "&temp=" + String(temp) 
+    + "&moves=" + String(movementCounter)
+    + "&pulses=" + String(energyCounter) 
+    + "&errors=" + String(errorCount);
   
   WiFiClientSecure client;
   if (client.connect(DATA_HOST, DATA_PORT)) {
@@ -90,10 +94,12 @@ void report() {
       }
       if (success) {
         energyCounter = 0;
-        movementCounter = 0; 
+        movementCounter = 0;
+        errorCount = 0;
         Serial.println("Data sent successfully");
       } else {
         Serial.println("An error occured");
+        errorCount++;
       }
     } else {
       Serial.println("Could not connect, will try later");
