@@ -3,7 +3,9 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <WiFiClientSecure.h>
+#include "statsd.h"
 #include "settings.h"
+#include "string.h"
 
 OneWire bus(0);
 DallasTemperature sensors(&bus);
@@ -14,9 +16,13 @@ unsigned int errorCount;
 unsigned long pulseStartTime;
 unsigned long pulseWidth;
 
+char _metricLabel[64];
+
 void recordPulse();
 void recordMovement();
 void report();
+
+StatsD sclient(STATSD_IP, STATSD_PORT, 31337);
 
 void setup() {
   Serial.begin(115200);
@@ -44,7 +50,7 @@ void loop() {
   sensors.requestTemperatures();
   delay(1000);
   report();
-  delay(5 * 60 * 1000);
+  delay(10000);
 }
 
 void recordMovement() {
@@ -68,42 +74,33 @@ void recordPulse() {
   }
 }
 
-void report() {
-  float temp = sensors.getTempCByIndex(0);
-  String url = String(DATA_PATH) + "&temp=" + String(temp) 
-    + "&moves=" + String(movementCounter)
-    + "&pulses=" + String(energyCounter) 
-    + "&errors=" + String(errorCount);
-  
-  WiFiClientSecure client;
-  if (client.connect(DATA_HOST, DATA_PORT)) {
-      client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-      "Host: data.sparkfun.com\r\n" +
-      "User-Agent: ESP8266-PowerMonitor\r\n" +
-      "Connection: close\r\n\r\n");
-       Serial.println("Sent request");
-  
-      bool success = false;
-  
-      while (client.connected()) {
-        String line = client.readStringUntil('\n');
-        if (line.startsWith("1 success")) {
-          success = true;
-          break;
-        }
-      }
-      if (success) {
-        energyCounter = 0;
-        movementCounter = 0;
-        errorCount = 0;
-        Serial.println("Data sent successfully");
-      } else {
-        Serial.println("An error occured");
-        errorCount++;
-      }
-    } else {
-      Serial.println("Could not connect, will try later");
-    }
+const char *metricLabel(const char *label) {
+  memset(_metricLabel, 0, 64);
+  strcpy(_metricLabel, NODE_NAME);
+  strcat(_metricLabel, ".");
+  strcat(_metricLabel, label);
+  return _metricLabel;
 }
 
+void reportTemperature() {
+  float temp = sensors.getTempCByIndex(0);
+  sclient.gauge(metricLabel("temperature"), temp);
+}
 
+void reportPulses() {
+  sclient.gauge(metricLabel("oneHalfWattHour"), energyCounter);
+  energyCounter = 0;
+}
+
+void reportMovement() {
+  if (movementCounter > 0) sclient.increment(metricLabel("movementIncrement"));
+  movementCounter = 0;
+}
+
+void report() {
+  Serial.println(millis());
+  Serial.println("Sending data");
+  reportTemperature();
+  reportPulses();
+  reportMovement();
+}
