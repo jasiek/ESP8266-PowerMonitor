@@ -1,8 +1,5 @@
-#include "Arduino.h"
 #include "Statsd.h"
-#include "WiFi.h"
-#include "WiFiUdp.h"
-#include "IPAddress.h"
+#include <IPAddress.h>
 #include "string.h"
 
 WiFiUDP statsd;

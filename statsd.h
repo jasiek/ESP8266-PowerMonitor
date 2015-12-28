@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "IPAddress.h"
-#include "WiFi.h"
+#include "ESP8266WiFi.h"
 #include "WiFiUdp.h"
 
 class StatsD
