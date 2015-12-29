@@ -11,19 +11,23 @@ StatsD::StatsD(IPAddress ip, int port, int localPort){
 }
 
 void StatsD::increment(const char *metric) {
-  StatsD::_send(metric,1,"c");
+  StatsD::_send(metric, 1, "c");
 }
 
 void StatsD::decrement(const char *metric) {
-  StatsD::_send(metric,-1,"c");
+  StatsD::_send(metric, -1, "c");
 }
 
 void StatsD::timing(const char *metric, int ms) {
-  StatsD::_send(metric,ms, "ms");
+  StatsD::_send(metric, ms, "ms");
 }
 
 void StatsD::gauge(const char *metric, int gaugeValue){
-  StatsD::_send(metric,gaugeValue,"g");
+  StatsD::_send(metric, gaugeValue, "g");
+}
+
+void StatsD::gauge(const char *metric, float gaugeValue) {
+  StatsD::_send(metric, gaugeValue, "g");
 }
 
 void StatsD::sets(const char *metric, int setsValue){
@@ -31,15 +35,21 @@ void StatsD::sets(const char *metric, int setsValue){
 }
 
 void StatsD::_send(const char *metric, int value, const char *cmd) {
-  //Convert the integer to a string (an int's maximum string length is 12 characters [sign(1) + digits(10) + null(1)]) –2,147,483,648 to 2,147,483,647
-  char valueString[12];
-  itoa(value,valueString,10);
+  String valueString = String(value);
+  _send(metric, valueString.c_str(), cmd);
+}
 
+void StatsD::_send(const char *metric, float value, const char *cmd) {
+  String valueString = String(value);
+  _send(metric, valueString.c_str(), cmd);
+}
+
+void StatsD::_send(const char *metric, const char *value, const char *cmd) {
   //Concatenate the parts of the final string
-  char buffer[strlen(metric) + strlen(valueString) + strlen(cmd) + 2 + 1]; //+2 for : and | and add +1 for null
+  char buffer[strlen(metric) + strlen(value) + strlen(cmd) + 2 + 1]; //+2 for : and | and add +1 for null
   strcpy(buffer, metric);
   strcat(buffer,":");
-  strcat(buffer,valueString);
+  strcat(buffer, value);
   strcat(buffer,"|");
   strcat(buffer, cmd);
 
@@ -49,3 +59,4 @@ void StatsD::_send(const char *metric, int value, const char *cmd) {
   statsd.write(msg, strlen(buffer));
   statsd.endPacket();
 }
+

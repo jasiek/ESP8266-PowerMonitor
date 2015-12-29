@@ -14,9 +14,12 @@ public:
   void decrement(const char *metric);
   void timing(const char *metric, int ms);
   void gauge(const char *metric, int gaugeValue);
+  void gauge(const char *metric, float gaugeValue);
   void sets(const char *metric, int setsValue);
 private:
   void _send(const char *metric, int value, const char *cmd);
+  void _send(const char *metric, float value, const char *cmd);
+  void _send(const char *metric, const char *value, const char *cmd);
   IPAddress _ip;
   int _port;
 };
