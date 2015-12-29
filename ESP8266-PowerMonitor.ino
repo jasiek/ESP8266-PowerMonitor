@@ -2,7 +2,6 @@
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <WiFiClientSecure.h>
 #include "statsd.h"
 #include "settings.h"
 #include "string.h"
@@ -84,16 +83,21 @@ const char *metricLabel(const char *label) {
 
 void reportTemperature() {
   float temp = sensors.getTempCByIndex(0);
+  Serial.println("temperature: " + String(temp));
   sclient.gauge(metricLabel("temperature"), temp);
 }
 
 void reportPulses() {
-  sclient.gauge(metricLabel("oneHalfWattHour"), energyCounter);
+  sclient.gauge(metricLabel("wattHour"), energyCounter);
+  Serial.println("energy: " + String(energyCounter) + " Wh");
   energyCounter = 0;
 }
 
 void reportMovement() {
-  if (movementCounter > 0) sclient.increment(metricLabel("movementIncrement"));
+  if (movementCounter > 0) {
+    Serial.println("movement detected");
+    sclient.increment(metricLabel("movementIncrement"));
+  }
   movementCounter = 0;
 }
 
