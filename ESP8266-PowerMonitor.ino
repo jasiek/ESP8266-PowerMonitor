@@ -20,23 +20,14 @@ char _metricLabel[64];
 void recordPulse();
 void recordMovement();
 void report();
+bool maybeReconnect();
 
 StatsD sclient(STATSD_IP, STATSD_PORT, 31337);
 
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  Serial.print("Connecting to network: ");
-  Serial.println(WIFI_SSID);
-
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-
-  Serial.println(WiFi.localIP());
-
+  maybeReconnect();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(5, INPUT);
@@ -102,9 +93,35 @@ void reportMovement() {
 }
 
 void report() {
-  Serial.println(millis());
-  Serial.println("Sending data");
-  reportTemperature();
-  reportPulses();
-  reportMovement();
+  if (maybeReconnect()) {
+    Serial.println(millis());
+    Serial.println("Sending data");
+    reportTemperature();
+    reportPulses();
+    reportMovement();
+  }
 }
+
+bool maybeReconnect() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.print("(Re)connecting to network: ");  
+    Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+  } else {
+    Serial.println("Already connected to network");
+    return true;
+  }
+  for (int i = 0; i < 30 && (WiFi.status() != WL_CONNECTED); i++) {
+    Serial.print(".");
+    delay(1000);
+  }
+  bool success = (WiFi.status() == WL_CONNECTED);
+  if (success) {
+    Serial.print("connected, got IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("Could not connect");
+  }
+  return success;
+}
+
