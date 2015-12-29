@@ -79,7 +79,7 @@ void reportTemperature() {
 }
 
 void reportPulses() {
-  sclient.gauge(metricLabel("wattHour"), energyCounter);
+  sclient.gauge(metricLabel("wattHour"), (int)energyCounter);
   Serial.println("energy: " + String(energyCounter) + " Wh");
   energyCounter = 0;
 }
@@ -106,7 +106,9 @@ bool maybeReconnect() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.print("(Re)connecting to network: ");  
     Serial.println(WIFI_SSID);
+
     WiFi.begin(WIFI_SSID, WIFI_PASS);
+    WiFi.mode(WIFI_STA);
   } else {
     Serial.println("Already connected to network");
     return true;
