@@ -107,7 +107,7 @@ void reportRSSI() {
   int rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
-  sclient.gauge(metricLabel("rssi"), rssi);
+  sclient.gauge(metricLabel("rssi"), -rssi);
 }
 
 void reportVoltage() {
