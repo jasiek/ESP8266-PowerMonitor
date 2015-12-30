@@ -23,10 +23,21 @@ void report();
 bool maybeReconnect();
 
 StatsD sclient(STATSD_IP, STATSD_PORT, 31337);
+String nodeName;
+
+ADC_MODE(ADC_VCC);
 
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  
+  nodeName = WiFi.macAddress();
+  nodeName.replace(':', '_');
+  nodeName.toLowerCase();
+
+  Serial.print("Node name: ");
+  Serial.println(nodeName);
+  
   maybeReconnect();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
@@ -66,7 +77,7 @@ void recordPulse() {
 
 const char *metricLabel(const char *label) {
   memset(_metricLabel, 0, 64);
-  strcpy(_metricLabel, NODE_NAME);
+  strcpy(_metricLabel, nodeName.c_str());
   strcat(_metricLabel, ".");
   strcat(_metricLabel, label);
   return _metricLabel;
@@ -92,6 +103,20 @@ void reportMovement() {
   movementCounter = 0;
 }
 
+void reportRSSI() {
+  int rssi = WiFi.RSSI();
+  Serial.print("RSSI: ");
+  Serial.println(rssi);
+  sclient.gauge(metricLabel("rssi"), rssi);
+}
+
+void reportVoltage() {
+  float voltage = ESP.getVcc() / 1000.0;
+  Serial.print("voltage: ");
+  Serial.println(voltage);
+  sclient.gauge(metricLabel("voltage"), voltage);
+}
+
 void report() {
   if (maybeReconnect()) {
     Serial.println(millis());
@@ -99,6 +124,8 @@ void report() {
     reportTemperature();
     reportPulses();
     reportMovement();
+    reportRSSI();
+    reportVoltage();
   }
 }
 
