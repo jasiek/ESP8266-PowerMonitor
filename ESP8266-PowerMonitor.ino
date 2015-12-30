@@ -32,7 +32,7 @@ void setup() {
   Serial.println();
   
   nodeName = WiFi.macAddress();
-  nodeName.replace(':', '_');
+  for (int i = nodeName.indexOf(':'); i > -1; i = nodeName.indexOf(':')) nodeName.remove(i, 1);
   nodeName.toLowerCase();
 
   Serial.print("Node name: ");
@@ -86,6 +86,7 @@ const char *metricLabel(const char *label) {
 void reportTemperature() {
   float temp = sensors.getTempCByIndex(0);
   Serial.println("temperature: " + String(temp));
+  sclient.gauge(metricLabel("temperature"), 0.0f);
   sclient.gauge(metricLabel("temperature"), temp);
 }
 
@@ -107,7 +108,8 @@ void reportRSSI() {
   int rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
-  sclient.gauge(metricLabel("rssi"), -rssi);
+  sclient.gauge(metricLabel("rssi"), 0.0f);
+  sclient.gauge(metricLabel("rssi"), rssi);
 }
 
 void reportVoltage() {
