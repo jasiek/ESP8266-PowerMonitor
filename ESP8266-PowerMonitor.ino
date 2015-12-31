@@ -9,9 +9,9 @@
 OneWire bus(0);
 DallasTemperature sensors(&bus);
 
-unsigned int movementCounter;
-unsigned int energyCounter;
-unsigned int errorCount;
+int movementCounter;
+int energyCounter;
+int errorCount;
 unsigned long pulseStartTime;
 unsigned long pulseWidth;
 
@@ -86,21 +86,20 @@ const char *metricLabel(const char *label) {
 void reportTemperature() {
   float temp = sensors.getTempCByIndex(0);
   Serial.println("temperature: " + String(temp));
-  sclient.gauge(metricLabel("temperature"), 0.0f);
+  sclient.gauge(metricLabel("temperature"), 0);
   sclient.gauge(metricLabel("temperature"), temp);
 }
 
 void reportPulses() {
-  sclient.gauge(metricLabel("wattHour"), (int)energyCounter);
+  sclient.gauge(metricLabel("wattHour"), energyCounter);
   Serial.println("energy: " + String(energyCounter) + " Wh");
   energyCounter = 0;
 }
 
 void reportMovement() {
-  if (movementCounter > 0) {
-    Serial.println("movement detected");
-    sclient.increment(metricLabel("movementIncrement"));
-  }
+  Serial.print("Movements: ");
+  Serial.println(movementCounter);
+  sclient.gauge(metricLabel("movement"), movementCounter);
   movementCounter = 0;
 }
 
@@ -108,7 +107,7 @@ void reportRSSI() {
   int rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
-  sclient.gauge(metricLabel("rssi"), 0.0f);
+  sclient.gauge(metricLabel("rssi"), 0);
   sclient.gauge(metricLabel("rssi"), rssi);
 }
 
