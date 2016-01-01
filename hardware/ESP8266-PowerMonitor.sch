@@ -125,18 +125,18 @@ F 3 "" H 6150 4850 60  0000 C CNN
 $EndComp
 Text Notes 6300 4900 0    60   ~ 0
 1Wire
-Text Notes 8100 2350 0    60   ~ 0
-GPIO0
+Text Notes 8100 2250 0    60   ~ 0
+GPIO4
 $Comp
 L R R2
 U 1 1 566F3AF7
-P 5700 4850
-F 0 "R2" V 5780 4850 50  0000 C CNN
-F 1 "4.7k" V 5700 4850 50  0000 C CNN
-F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM10mm" V 5630 4850 30  0001 C CNN
-F 3 "" H 5700 4850 30  0000 C CNN
-	1    5700 4850
-	0    1    1    0   
+P 5700 5100
+F 0 "R2" V 5780 5100 50  0000 C CNN
+F 1 "4.7k" V 5700 5100 50  0000 C CNN
+F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM10mm" V 5630 5100 30  0001 C CNN
+F 3 "" H 5700 5100 30  0000 C CNN
+	1    5700 5100
+	-1   0    0    1   
 $EndComp
 $Comp
 L CONN_01X03 P4
@@ -185,20 +185,14 @@ Wire Wire Line
 	10200 4300 10400 4300
 Text GLabel 9800 4900 0    60   Input ~ 0
 GND
-Text GLabel 9800 5050 0    60   Input ~ 0
-3.3V
 Text GLabel 9800 5200 0    60   Input ~ 0
+3.3V
+Text GLabel 9800 5050 0    60   Input ~ 0
 5V
 Wire Wire Line
 	9800 4900 10400 4900
 Wire Wire Line
 	10400 4900 10400 4950
-Wire Wire Line
-	9800 5050 10400 5050
-Wire Wire Line
-	9800 5200 10400 5200
-Wire Wire Line
-	10400 5200 10400 5150
 Text GLabel 5600 4000 0    60   Input ~ 0
 GND
 Text GLabel 5600 4300 0    60   Input ~ 0
@@ -218,23 +212,15 @@ Wire Wire Line
 Text GLabel 5600 4700 0    60   Input ~ 0
 GND
 Text GLabel 5450 4850 0    60   Input ~ 0
-GPIO0
-Text GLabel 5600 5000 0    60   Input ~ 0
+GPIO4
+Text GLabel 5550 5300 0    60   Input ~ 0
 3.3V
-Wire Wire Line
-	5600 5000 5950 5000
-Wire Wire Line
-	5950 5000 5950 4950
 Wire Wire Line
 	5600 4700 5950 4700
 Wire Wire Line
 	5950 4700 5950 4750
-Wire Wire Line
-	5450 4850 5550 4850
-Wire Wire Line
-	5850 4850 5950 4850
-Text GLabel 7700 2300 0    60   Input ~ 0
-GPIO0
+Text GLabel 7700 2200 0    60   Input ~ 0
+GPIO4
 Text GLabel 7700 2100 0    60   Input ~ 0
 GPIO5
 Text GLabel 6450 3700 0    60   Input ~ 0
@@ -252,11 +238,29 @@ Wire Wire Line
 Wire Wire Line
 	7100 3300 7000 3300
 Wire Wire Line
-	7700 2300 7800 2300
-Wire Wire Line
 	7700 2100 7800 2100
 Text GLabel 7700 3000 0    60   Input ~ 0
 GPIO15
 Wire Wire Line
 	7700 3000 7800 3000
+Wire Wire Line
+	7700 2200 7800 2200
+Wire Wire Line
+	5450 4850 5950 4850
+Wire Wire Line
+	5700 4950 5700 4850
+Connection ~ 5700 4850
+Wire Wire Line
+	5550 5300 5950 5300
+Wire Wire Line
+	5700 5300 5700 5250
+Wire Wire Line
+	5950 5300 5950 4950
+Connection ~ 5700 5300
+Wire Wire Line
+	9800 5050 10400 5050
+Wire Wire Line
+	10400 5150 10400 5200
+Wire Wire Line
+	10400 5200 9800 5200
 $EndSCHEMATC
