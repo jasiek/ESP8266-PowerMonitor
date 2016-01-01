@@ -5,7 +5,7 @@
 #include "settings.h"
 #include "string.h"
 
-OneWire bus(0);
+OneWire bus(4); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 
 int movementCounter;
@@ -42,11 +42,32 @@ void setup() {
   pulseStartTime = millis();
   pinMode(5, INPUT);
   pinMode(15, INPUT);
+  pinMode(16, OUTPUT); // Used for signalling errors
   attachInterrupt(15, recordPulse, CHANGE);
   attachInterrupt(5, recordMovement, RISING);
 }
 
+void error(int num) {
+  int i = 0;
+  digitalWrite(16, HIGH);
+  while (1) {
+    for (i = 0; i < num; i++) {
+      digitalWrite(16, LOW);
+      delay(100);
+      digitalWrite(16, HIGH);
+      delay(100);
+    }
+
+    delay(5000);
+  }
+}
+
 void loop() {
+  sensors.begin();
+  if (sensors.getDeviceCount() < 1) {
+    error(1);
+  }
+  
   sensors.requestTemperatures();
   delay(1000);
   report();
