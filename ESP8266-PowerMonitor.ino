@@ -38,7 +38,7 @@ void setup() {
   pinMode(5, INPUT);
   pinMode(15, INPUT);
   pinMode(16, OUTPUT); // Used for signalling errors
-  attachInterrupt(15, recordPulse, CHANGE);
+  attachInterrupt(15, pulseRise, RISING);
   attachInterrupt(5, recordMovement, RISING);
 }
 
@@ -73,21 +73,21 @@ void recordMovement() {
   movementCounter++;
 }
 
-void recordPulse() {
+void pulseRise() {
   // are we rising or falling?
   unsigned long now = millis();
-  if (digitalRead(15) == 1) {
-    // rising
-    pulseStartTime = now;
-  } else {
-    // falling
-    pulseWidth = now - pulseStartTime;
-    if (pulseWidth > 80 && pulseWidth < 100) {
-      // workaround?
-      pulseStartTime = now;
-      energyCounter++;
-    }
+  pulseStartTime = now;
+  attachInterrupt(15, pulseFall, FALLING);
+}
+
+void pulseFall() {
+  unsigned long now = millis();
+  pulseWidth = now - pulseStartTime;
+  if (pulseWidth > 80 && pulseWidth < 100) {
+    // workaround?
+    energyCounter++;
   }
+  attachInterrupt(15, pulseRise, RISING);
 }
 
 const char *metricLabel(const char *label) {
