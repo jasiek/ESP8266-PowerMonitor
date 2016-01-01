@@ -117,6 +117,10 @@ void reportVoltage() {
   sclient.gauge(metricLabel("voltage"), voltage);
 }
 
+void incrementDataCounter() {
+  sclient.increment(metricLabel("packets"));
+}
+
 void report() {
   if (maybeReconnect()) {
     Serial.println(millis());
@@ -126,6 +130,7 @@ void report() {
     reportMovement();
     reportRSSI();
     reportVoltage();
+    incrementDataCounter();
   }
 }
 
