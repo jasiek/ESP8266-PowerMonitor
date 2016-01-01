@@ -1,7 +1,6 @@
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
 #include "statsd.h"
 #include "settings.h"
 #include "string.h"
