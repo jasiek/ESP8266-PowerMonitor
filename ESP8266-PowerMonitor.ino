@@ -1,6 +1,7 @@
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include "statsd.h"
 #include "settings.h"
 #include "string.h"
@@ -30,14 +31,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println();
   
-  nodeName = WiFi.macAddress();
-  for (int i = nodeName.indexOf(':'); i > -1; i = nodeName.indexOf(':')) nodeName.remove(i, 1);
-  nodeName.toLowerCase();
-
-  Serial.print("Node name: ");
-  Serial.println(nodeName);
-  
   maybeReconnect();
+  determineNodeName();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(5, INPUT);
@@ -180,3 +175,14 @@ bool maybeReconnect() {
   return success;
 }
 
+void determineNodeName() {
+  nodeName = WiFi.macAddress();
+  for (int i = nodeName.indexOf(':'); i > -1; i = nodeName.indexOf(':')) nodeName.remove(i, 1);
+  nodeName.toLowerCase();
+
+  Serial.print("Node name: ");
+  Serial.println(nodeName);
+
+  MDNS.begin(nodeName.c_str());
+  MDNS.addService("http", "tcp", 80);
+}
