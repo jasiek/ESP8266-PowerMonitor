@@ -17,7 +17,9 @@ unsigned long pulseWidth;
 
 char _metricLabel[64];
 
-void recordPulse();
+void pulseRise();
+void pulseFall();
+void determineNodeName();
 void recordMovement();
 void report();
 bool maybeReconnect();
