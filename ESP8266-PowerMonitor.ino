@@ -40,6 +40,7 @@ void setup() {
   pinMode(5, INPUT);
   pinMode(15, INPUT);
   pinMode(16, OUTPUT); // Used for signalling errors
+  digitalWrite(16, HIGH);
   attachInterrupt(15, pulseRise, RISING);
   attachInterrupt(5, recordMovement, RISING);
 }
@@ -47,28 +48,35 @@ void setup() {
 void error(int num) {
   int i = 0;
   digitalWrite(16, HIGH);
-  while (1) {
-    for (i = 0; i < num; i++) {
-      digitalWrite(16, LOW);
-      delay(100);
-      digitalWrite(16, HIGH);
-      delay(100);
-    }
-
-    delay(5000);
+  for (i = 0; i < num; i++) {
+    digitalWrite(16, LOW);
+    delay(100);
+    digitalWrite(16, HIGH);
+    delay(100);
   }
 }
 
 void loop() {
   sensors.begin();
-  if (sensors.getDeviceCount() < 1) {
-    error(1);
+  int tries = 0;
+  bool success = false;
+  // Problems with EM interference? Just retry...
+  while (tries < 10) {
+    success = sensors.getDeviceCount() > 0;
+    if (success) break;
+    delay(500);
+    sensors.begin();
+    tries++;
   }
-  
-  sensors.requestTemperatures();
-  delay(1000);
-  report();
-  delay(10000);
+
+  if (success) {
+    sensors.requestTemperatures();
+    delay(1000);
+    report();
+    delay(60 * 1000);
+  } else {
+    error(tries);
+  }
 }
 
 void recordMovement() {
