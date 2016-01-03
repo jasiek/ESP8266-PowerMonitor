@@ -1,6 +1,10 @@
+#include <ArduinoJson.h>
+#include <Ticker.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "statsd.h"
 #include "settings.h"
@@ -8,12 +12,18 @@
 
 OneWire bus(4); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
+ESP8266WebServer server(80);
+Ticker readAndReport;
 
 int movementCounter;
 int energyCounter;
-int errorCount;
+int errorCounter;
 unsigned long pulseStartTime;
 unsigned long pulseWidth;
+unsigned long packetsSent;
+float voltage;
+float temperature;
+int rssi;
 
 char _metricLabel[64];
 
@@ -22,6 +32,8 @@ void pulseFall();
 void determineNodeName();
 void recordMovement();
 void report();
+void setupHttpServer();
+void attemptSensorReadAndReport();
 bool maybeReconnect();
 
 StatsD sclient(STATSD_IP, STATSD_PORT, 31337);
@@ -32,9 +44,10 @@ ADC_MODE(ADC_VCC);
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  
+
   maybeReconnect();
   determineNodeName();
+  setupHttpServer();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(5, INPUT);
@@ -43,6 +56,8 @@ void setup() {
   digitalWrite(16, HIGH);
   attachInterrupt(15, pulseRise, RISING);
   attachInterrupt(5, recordMovement, RISING);
+
+  readAndReport.attach(10, attemptSensorReadAndReport);
 }
 
 void error(int num) {
@@ -57,26 +72,7 @@ void error(int num) {
 }
 
 void loop() {
-  sensors.begin();
-  int tries = 0;
-  bool success = false;
-  // Problems with EM interference? Just retry...
-  while (tries < 10) {
-    success = sensors.getDeviceCount() > 0;
-    if (success) break;
-    delay(500);
-    sensors.begin();
-    tries++;
-  }
-
-  if (success) {
-    sensors.requestTemperatures();
-    delay(1000);
-    report();
-    delay(60 * 1000);
-  } else {
-    error(tries);
-  }
+  server.handleClient();
 }
 
 void recordMovement() {
@@ -109,10 +105,10 @@ const char *metricLabel(const char *label) {
 }
 
 void reportTemperature() {
-  float temp = sensors.getTempCByIndex(0);
-  Serial.println("temperature: " + String(temp));
+  temperature = sensors.getTempCByIndex(0);
+  Serial.println("temperature: " + String(temperature));
   sclient.gauge(metricLabel("temperature"), 0);
-  sclient.gauge(metricLabel("temperature"), temp);
+  sclient.gauge(metricLabel("temperature"), temperature);
 }
 
 void reportPulses() {
@@ -129,7 +125,7 @@ void reportMovement() {
 }
 
 void reportRSSI() {
-  int rssi = WiFi.RSSI();
+  rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
   sclient.gauge(metricLabel("rssi"), 0);
@@ -137,13 +133,14 @@ void reportRSSI() {
 }
 
 void reportVoltage() {
-  float voltage = ESP.getVcc() / 1000.0;
+  voltage = ESP.getVcc() / 1000.0;
   Serial.print("voltage: ");
   Serial.println(voltage);
   sclient.gauge(metricLabel("voltage"), voltage);
 }
 
 void incrementDataCounter() {
+  packetsSent++;
   sclient.increment(metricLabel("packets"));
 }
 
@@ -196,3 +193,48 @@ void determineNodeName() {
   MDNS.begin(nodeName.c_str());
   MDNS.addService("http", "tcp", 80);
 }
+
+void attemptSensorReadAndReport() {
+  sensors.begin();
+  int tries = 0;
+  bool success = false;
+  // Problems with EM interference? Just retry...
+  while (tries < 10) {
+    success = sensors.getDeviceCount() > 0;
+    if (success) break;
+    delay(500);
+    sensors.begin();
+    tries++;
+  }
+
+  if (success) {
+    sensors.requestTemperatures();
+    delay(1000);
+    report();
+    delay(60 * 1000);
+  } else {
+    errorCounter++;
+    error(tries);
+  }
+}
+
+void setupHttpServer() {
+  server.on("/", [](){
+    String stream;
+    StaticJsonBuffer<200> buffer;
+    JsonObject& root = buffer.createObject();
+    root["nodeName"] = nodeName;
+    root["temperature"] = temperature;
+    root["movementCounter"] = movementCounter;
+    root["energyCounter"] = energyCounter;
+    root["errorCounter"] = errorCounter;
+    root["voltage"] = voltage;
+    root["rssi"] = rssi;
+    root["packetsSent"] = packetsSent;
+    root["uptime"] = millis();
+    root.printTo(stream);
+    server.send(200, "application/json", stream);
+  });
+  server.begin();
+}
+
