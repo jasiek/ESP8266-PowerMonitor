@@ -10,7 +10,13 @@
 #include "settings.h"
 #include "string.h"
 
-OneWire bus(4); // Use GPIO4 as it is not connected to any peripherals
+
+#define PULSE_PIN 2
+#define ONEWIRE_PIN 4
+#define PIR_PIN 5
+#define LED_PIN 16
+
+OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 ESP8266WebServer server(80);
 Ticker readAndReport;
@@ -27,8 +33,8 @@ int rssi;
 
 char _metricLabel[64];
 
-void pulseRise();
-void pulseFall();
+void pulseStart();
+void pulseEnd();
 void determineNodeName();
 void recordMovement();
 void report();
@@ -50,23 +56,23 @@ void setup() {
   setupHttpServer();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
-  pinMode(5, INPUT);
-  pinMode(15, INPUT);
-  pinMode(16, OUTPUT); // Used for signalling errors
-  digitalWrite(16, HIGH);
-  attachInterrupt(15, pulseRise, RISING);
-  attachInterrupt(5, recordMovement, RISING);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(PULSE_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT); // Used for signalling errors
+  digitalWrite(LED_PIN, HIGH);
+  attachInterrupt(PULSE_PIN, pulseStart, FALLING);
+  attachInterrupt(PIR_PIN, recordMovement, RISING);
 
   readAndReport.attach(10, attemptSensorReadAndReport);
 }
 
 void error(int num) {
   int i = 0;
-  digitalWrite(16, HIGH);
+  digitalWrite(LED_PIN, HIGH);
   for (i = 0; i < num; i++) {
-    digitalWrite(16, LOW);
+    digitalWrite(LED_PIN, LOW);
     delay(100);
-    digitalWrite(16, HIGH);
+    digitalWrite(LED_PIN, HIGH);
     delay(100);
   }
 }
@@ -79,21 +85,23 @@ void recordMovement() {
   movementCounter++;
 }
 
-void pulseRise() {
+void pulseStart() {
   // are we rising or falling?
   unsigned long now = millis();
   pulseStartTime = now;
-  attachInterrupt(15, pulseFall, FALLING);
+  attachInterrupt(PULSE_PIN, pulseEnd, RISING);
 }
 
-void pulseFall() {
+void pulseEnd() {
   unsigned long now = millis();
   pulseWidth = now - pulseStartTime;
-  if (pulseWidth > 80 && pulseWidth < 100) {
+  // The pulse length is said to be 90ms. I suspect there's some R/C stuff going on here
+  // that makes it actually 35ms more or less. I can't really tell without a scope.
+  if (pulseWidth > 27 && pulseWidth < 42) {
     // workaround?
     energyCounter++;
   }
-  attachInterrupt(15, pulseRise, RISING);
+  attachInterrupt(PULSE_PIN, pulseStart, FALLING);
 }
 
 const char *metricLabel(const char *label) {
