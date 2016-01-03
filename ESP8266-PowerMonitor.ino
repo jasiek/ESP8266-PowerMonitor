@@ -209,9 +209,7 @@ void attemptSensorReadAndReport() {
 
   if (success) {
     sensors.requestTemperatures();
-    delay(1000);
     report();
-    delay(60 * 1000);
   } else {
     errorCounter++;
     error(tries);
