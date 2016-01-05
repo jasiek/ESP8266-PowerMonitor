@@ -15,6 +15,8 @@
 #define ONEWIRE_PIN 4
 #define PIR_PIN 5
 #define LED_PIN 16
+// Report frequency is in seconds
+#define REPORT_FREQUENCY 60
 
 OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
@@ -63,7 +65,7 @@ void setup() {
   attachInterrupt(PULSE_PIN, pulseStart, FALLING);
   attachInterrupt(PIR_PIN, recordMovement, RISING);
 
-  readAndReport.attach(10, attemptSensorReadAndReport);
+  readAndReport.attach(REPORT_FREQUENCY, attemptSensorReadAndReport);
 }
 
 void error(int num) {
