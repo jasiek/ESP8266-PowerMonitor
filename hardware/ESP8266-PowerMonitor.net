@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /Users/jps/github/ESP8266-PowerMonitor/hardware/ESP8266-PowerMonitor.sch)
-    (date "Sunday, 03 January 2016 13:35:36")
+    (date "Wednesday, 06 January 2016 18:03:18")
     (tool "Eeschema (2015-12-14 BZR 6375)-product")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -52,7 +52,7 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 566A8D76))
     (comp (ref R2)
-      (value 4.7k)
+      (value 2.2k)
       (footprint Resistors_ThroughHole:Resistor_Horizontal_RM10mm)
       (libsource (lib device) (part R))
       (sheetpath (names /) (tstamps /))
@@ -65,6 +65,7 @@
       (tstamp 566F3C3D))
     (comp (ref R3)
       (value 470)
+      (footprint Resistors_ThroughHole:Resistor_Horizontal_RM10mm)
       (libsource (lib device) (part R))
       (sheetpath (names /) (tstamps /))
       (tstamp 56891048)))
