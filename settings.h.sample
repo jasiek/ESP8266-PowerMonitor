@@ -1,2 +1,7 @@
 #define WIFI_SSID "telemetry"
 #define WIFI_PASS "telemetry"
+#define STATSD_IP IPAddress(192, 168, 1, 5)
+#define STATSD_PORT 8125
+#define METER_PULSE_WIDTH 80
+#define PULSE_PER_WH 2
+

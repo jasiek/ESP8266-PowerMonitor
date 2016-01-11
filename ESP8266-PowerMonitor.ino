@@ -97,9 +97,7 @@ void pulseStart() {
 void pulseEnd() {
   unsigned long now = millis();
   pulseWidth = now - pulseStartTime;
-  // The pulse length is said to be 90ms. I suspect there's some R/C stuff going on here
-  // that makes it actually 35ms more or less. I can't really tell without a scope.
-  if (pulseWidth > 27 && pulseWidth < 42) {
+  if (pulseWidth > METER_PULSE_WIDTH - 15 && pulseWidth < METER_PULSE_WIDTH + 15) {
     // workaround?
     energyCounter++;
   }
@@ -122,8 +120,8 @@ void reportTemperature() {
 }
 
 void reportPulses() {
-  sclient.gauge(metricLabel("wattHour"), energyCounter);
-  Serial.println("energy: " + String(energyCounter) + " Wh");
+  sclient.gauge(metricLabel("wattHour"), 1.0f * energyCounter / PULSE_PER_WH);
+  Serial.println("energy: " + String(energyCounter) + " pulses");
   energyCounter = 0;
 }
 
@@ -234,7 +232,7 @@ void setupHttpServer() {
     root["nodeName"] = nodeName;
     root["temperature"] = temperature;
     root["movementCounter"] = movementCounter;
-    root["energyCounter"] = energyCounter;
+    root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
     root["errorCounter"] = errorCounter;
     root["voltage"] = voltage;
     root["rssi"] = rssi;
