@@ -12,6 +12,7 @@ public:
   StatsD(IPAddress ip, int port, int localPort);
   void increment(const char *metric);
   void decrement(const char *metric);
+  void counter(const char *metric, int counter);
   void timing(const char *metric, int ms);
   void gauge(const char *metric, int gaugeValue);
   void gauge(const char *metric, float gaugeValue);

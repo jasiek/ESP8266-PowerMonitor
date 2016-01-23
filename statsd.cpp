@@ -14,6 +14,10 @@ void StatsD::increment(const char *metric) {
   StatsD::_send(metric, 1, "c");
 }
 
+void StatsD::counter(const char *metric, int counter) {
+  StatsD::_send(metric, counter, "c");
+}
+
 void StatsD::decrement(const char *metric) {
   StatsD::_send(metric, -1, "c");
 }

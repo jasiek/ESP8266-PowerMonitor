@@ -120,7 +120,7 @@ void reportTemperature() {
 }
 
 void reportPulses() {
-  sclient.gauge(metricLabel("wattHour"), 1.0f * energyCounter / PULSE_PER_WH);
+  sclient.counter(metricLabel("energy"), energyCounter);
   Serial.println("energy: " + String(energyCounter) + " pulses");
   energyCounter = 0;
 }
@@ -128,7 +128,7 @@ void reportPulses() {
 void reportMovement() {
   Serial.print("Movements: ");
   Serial.println(movementCounter);
-  sclient.gauge(metricLabel("movement"), movementCounter);
+  sclient.counter(metricLabel("movement"), movementCounter);
   movementCounter = 0;
 }
 
