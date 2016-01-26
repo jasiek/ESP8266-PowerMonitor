@@ -1,12 +1,14 @@
+#include <statsdclient.h>
 #include <ArduinoJson.h>
 #include <Ticker.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
+#include "IPAddress.h"
+#include "WiFiUdp.h"
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include "statsd.h"
 #include "settings.h"
 #include "string.h"
 
@@ -22,6 +24,9 @@ OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 ESP8266WebServer server(80);
 Ticker readAndReport;
+
+WiFiUDP statsdUdp;
+statsdclient statsd(STATSD_IP, STATSD_PORT, statsdUdp);
 
 int movementCounter;
 int energyCounter;
@@ -44,7 +49,6 @@ void setupHttpServer();
 void attemptSensorReadAndReport();
 bool maybeReconnect();
 
-StatsD sclient(STATSD_IP, STATSD_PORT, 31337);
 String nodeName;
 
 ADC_MODE(ADC_VCC);
@@ -115,20 +119,20 @@ const char *metricLabel(const char *label) {
 void reportTemperature() {
   temperature = sensors.getTempCByIndex(0);
   Serial.println("temperature: " + String(temperature));
-  sclient.gauge(metricLabel("temperature"), 0);
-  sclient.gauge(metricLabel("temperature"), temperature);
+  statsd.begin().gauge(metricLabel("temperature"), 0).send();
+  statsd.begin().gauge(metricLabel("temperature"), temperature).send();
 }
 
 void reportPulses() {
-  sclient.counter(metricLabel("energy"), energyCounter);
   Serial.println("energy: " + String(energyCounter) + " pulses");
+  statsd.begin().counter(metricLabel("energy"), energyCounter).send();
   energyCounter = 0;
 }
 
 void reportMovement() {
   Serial.print("Movements: ");
   Serial.println(movementCounter);
-  sclient.counter(metricLabel("movement"), movementCounter);
+  statsd.begin().counter(metricLabel("movement"), movementCounter).send();
   movementCounter = 0;
 }
 
@@ -136,20 +140,20 @@ void reportRSSI() {
   rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
-  sclient.gauge(metricLabel("rssi"), 0);
-  sclient.gauge(metricLabel("rssi"), rssi);
+  statsd.begin().gauge(metricLabel("rssi"), 0).send();
+  statsd.begin().gauge(metricLabel("rssi"), rssi).send();
 }
 
 void reportVoltage() {
   voltage = ESP.getVcc() / 1000.0;
   Serial.print("voltage: ");
   Serial.println(voltage);
-  sclient.gauge(metricLabel("voltage"), voltage);
+  statsd.begin().gauge(metricLabel("voltage"), voltage).send();
 }
 
 void incrementDataCounter() {
   packetsSent++;
-  sclient.increment(metricLabel("packets"));
+  statsd.begin().counter(metricLabel("packets"), 1).send();
 }
 
 void report() {
