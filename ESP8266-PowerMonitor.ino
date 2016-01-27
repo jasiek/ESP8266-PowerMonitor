@@ -119,8 +119,7 @@ const char *metricLabel(const char *label) {
 void reportTemperature() {
   temperature = sensors.getTempCByIndex(0);
   Serial.println("temperature: " + String(temperature));
-  statsd.begin().gauge(metricLabel("temperature"), 0).send();
-  statsd.begin().gauge(metricLabel("temperature"), temperature).send();
+  statsd.begin().gauge(metricLabel("temperature"), 0).gauge(metricLabel("temperature"), temperature).send();
 }
 
 void reportPulses() {
@@ -140,8 +139,7 @@ void reportRSSI() {
   rssi = WiFi.RSSI();
   Serial.print("RSSI: ");
   Serial.println(rssi);
-  statsd.begin().gauge(metricLabel("rssi"), 0).send();
-  statsd.begin().gauge(metricLabel("rssi"), rssi).send();
+  statsd.begin().gauge(metricLabel("rssi"), 0).gauge(metricLabel("rssi"), rssi).send();
 }
 
 void reportVoltage() {
@@ -220,6 +218,7 @@ void attemptSensorReadAndReport() {
   }
 
   if (success) {
+    sensors.setResolution(12);
     sensors.requestTemperatures();
     report();
   } else {
