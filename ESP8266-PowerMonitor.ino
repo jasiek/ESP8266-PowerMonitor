@@ -9,6 +9,7 @@
 #include "WiFiUdp.h"
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266HTTPClient.h>
 #include "settings.h"
 #include "string.h"
 
@@ -24,9 +25,6 @@ OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 ESP8266WebServer server(80);
 Ticker readAndReport;
-
-WiFiUDP statsdUdp;
-statsdclient statsd(STATSD_IP, STATSD_PORT, statsdUdp);
 
 int movementCounter;
 int energyCounter;
@@ -108,62 +106,39 @@ void pulseEnd() {
   attachInterrupt(PULSE_PIN, pulseStart, FALLING);
 }
 
-const char *metricLabel(const char *label) {
-  memset(_metricLabel, 0, 64);
-  strcpy(_metricLabel, nodeName.c_str());
-  strcat(_metricLabel, ".");
-  strcat(_metricLabel, label);
-  return _metricLabel;
-}
-
-void reportTemperature() {
-  temperature = sensors.getTempCByIndex(0);
-  Serial.println("temperature: " + String(temperature));
-  statsd.begin().gauge(metricLabel("temperature"), 0).gauge(metricLabel("temperature"), temperature).send();
-}
-
-void reportPulses() {
-  Serial.println("energy: " + String(energyCounter) + " pulses");
-  statsd.begin().counter(metricLabel("energy"), energyCounter).send();
-  energyCounter = 0;
-}
-
-void reportMovement() {
-  Serial.print("Movements: ");
-  Serial.println(movementCounter);
-  statsd.begin().counter(metricLabel("movement"), movementCounter).send();
-  movementCounter = 0;
-}
-
-void reportRSSI() {
-  rssi = WiFi.RSSI();
-  Serial.print("RSSI: ");
-  Serial.println(rssi);
-  statsd.begin().gauge(metricLabel("rssi"), 0).gauge(metricLabel("rssi"), rssi).send();
-}
-
-void reportVoltage() {
-  voltage = ESP.getVcc() / 1000.0;
-  Serial.print("voltage: ");
-  Serial.println(voltage);
-  statsd.begin().gauge(metricLabel("voltage"), voltage).send();
-}
-
-void incrementDataCounter() {
-  packetsSent++;
-  statsd.begin().counter(metricLabel("packets"), 1).send();
-}
-
 void report() {
   if (maybeReconnect()) {
     Serial.println(millis());
     Serial.println("Sending data");
-    reportTemperature();
-    reportPulses();
-    reportMovement();
-    reportRSSI();
-    reportVoltage();
-    incrementDataCounter();
+
+    voltage = ESP.getVcc() / 1000.0;
+    rssi = WiFi.RSSI();
+    temperature = sensors.getTempCByIndex(0);
+
+
+    HTTPClient http;
+    http.begin("http://192.168.0.25:9292/devices/" + nodeName);
+
+    String stream;
+    StaticJsonBuffer<200> buffer;
+    JsonObject& root = buffer.createObject();
+    root["nodeName"] = nodeName;
+    root["temperature"] = temperature;
+    root["movementCounter"] = movementCounter;
+    root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
+    root["errorCounter"] = errorCounter;
+    root["voltage"] = voltage;
+    root["rssi"] = rssi;
+    root["packetsSent"] = packetsSent;
+    root["uptime"] = millis();
+    root.printTo(stream);
+
+    http.POST(stream);
+    http.end();
+    
+    packetsSent++;
+    movementCounter = 0;
+    energyCounter = 0;
   }
 }
 
