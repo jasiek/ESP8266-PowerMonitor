@@ -1,18 +1,14 @@
-#include <statsdclient.h>
 #include <ArduinoJson.h>
 #include <Ticker.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include "IPAddress.h"
-#include "WiFiUdp.h"
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
+#include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266mDNS.h>
+#include "IPAddress.h"
 #include "settings.h"
 #include "string.h"
-
 
 #define PULSE_PIN 2
 #define ONEWIRE_PIN 4
@@ -21,11 +17,14 @@
 // Report frequency is in seconds
 #define REPORT_FREQUENCY 60
 
+ADC_MODE(ADC_VCC);
+
 OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
-ESP8266WebServer server(80);
 Ticker readAndReport;
+ESP8266WiFiMulti WiFiMulti;
 
+String nodeName;
 int movementCounter;
 int energyCounter;
 int errorCounter;
@@ -36,28 +35,23 @@ float voltage;
 float temperature;
 int rssi;
 
-char _metricLabel[64];
-
 void pulseStart();
 void pulseEnd();
 void determineNodeName();
 void recordMovement();
 void report();
-void setupHttpServer();
 void attemptSensorReadAndReport();
-bool maybeReconnect();
-
-String nodeName;
-
-ADC_MODE(ADC_VCC);
+void maybeReconnect();
 
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  
+  WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
+  WiFiMulti.addAP("telemetry", "telemetry");
 
   maybeReconnect();
   determineNodeName();
-  setupHttpServer();
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(PIR_PIN, INPUT);
@@ -82,7 +76,6 @@ void error(int num) {
 }
 
 void loop() {
-  server.handleClient();
 }
 
 void recordMovement() {
@@ -107,64 +100,47 @@ void pulseEnd() {
 }
 
 void report() {
-  if (maybeReconnect()) {
-    Serial.println(millis());
-    Serial.println("Sending data");
+  maybeReconnect();
+  Serial.println(millis());
+  Serial.println("Sending data");
 
-    voltage = ESP.getVcc() / 1000.0;
-    rssi = WiFi.RSSI();
-    temperature = sensors.getTempCByIndex(0);
+  voltage = ESP.getVcc() / 1000.0;
+  rssi = WiFi.RSSI();
+  temperature = sensors.getTempCByIndex(0);
 
+  HTTPClient http;
+  http.begin(String(API_ENDPOINT) + nodeName);
+  String stream;
+  StaticJsonBuffer<200> buffer;
+  JsonObject& root = buffer.createObject();
+  root["temperature"] = temperature;
+  root["movementCounter"] = movementCounter;
+  root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
+  root["errorCounter"] = errorCounter;
+  root["voltage"] = voltage;
+  root["rssi"] = rssi;
+  root["packetsSent"] = packetsSent;
+  root["uptime"] = millis();
+  root.printTo(stream);
 
-    HTTPClient http;
-    http.begin("http://192.168.0.25:9292/devices/" + nodeName);
-
-    String stream;
-    StaticJsonBuffer<200> buffer;
-    JsonObject& root = buffer.createObject();
-    root["nodeName"] = nodeName;
-    root["temperature"] = temperature;
-    root["movementCounter"] = movementCounter;
-    root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
-    root["errorCounter"] = errorCounter;
-    root["voltage"] = voltage;
-    root["rssi"] = rssi;
-    root["packetsSent"] = packetsSent;
-    root["uptime"] = millis();
-    root.printTo(stream);
-
-    http.POST(stream);
-    http.end();
-    
+  if (http.POST(stream) == 200) {
     packetsSent++;
     movementCounter = 0;
     energyCounter = 0;
+  } else {
+    Serial.println(http.getString());
+    errorCounter++;
   }
+  
+  http.end();
 }
 
-bool maybeReconnect() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.print("(Re)connecting to network: ");  
-    Serial.println(WIFI_SSID);
-
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
-    WiFi.mode(WIFI_STA);
-  } else {
-    Serial.println("Already connected to network");
-    return true;
+void maybeReconnect() {
+  while (WiFiMulti.run() != WL_CONNECTED) {
+    Serial.println("(Re)connecting...");
   }
-  for (int i = 0; i < 30 && (WiFi.status() != WL_CONNECTED); i++) {
-    Serial.print(".");
-    delay(1000);
-  }
-  bool success = (WiFi.status() == WL_CONNECTED);
-  if (success) {
-    Serial.print("connected, got IP: ");
-    Serial.println(WiFi.localIP());
-  } else {
-    Serial.println("Could not connect");
-  }
-  return success;
+  Serial.print("connected, got IP: ");
+  Serial.println(WiFi.localIP());
 }
 
 void determineNodeName() {
@@ -200,25 +176,5 @@ void attemptSensorReadAndReport() {
     errorCounter++;
     error(tries);
   }
-}
-
-void setupHttpServer() {
-  server.on("/", [](){
-    String stream;
-    StaticJsonBuffer<200> buffer;
-    JsonObject& root = buffer.createObject();
-    root["nodeName"] = nodeName;
-    root["temperature"] = temperature;
-    root["movementCounter"] = movementCounter;
-    root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
-    root["errorCounter"] = errorCounter;
-    root["voltage"] = voltage;
-    root["rssi"] = rssi;
-    root["packetsSent"] = packetsSent;
-    root["uptime"] = millis();
-    root.printTo(stream);
-    server.send(200, "application/json", stream);
-  });
-  server.begin();
 }
 
