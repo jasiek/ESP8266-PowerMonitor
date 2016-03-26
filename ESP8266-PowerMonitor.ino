@@ -15,7 +15,7 @@
 #define PIR_PIN 5
 #define LED_PIN 16
 // Report frequency is in seconds
-#define REPORT_FREQUENCY 60
+#define REPORT_FREQUENCY 300
 
 ADC_MODE(ADC_VCC);
 
@@ -48,7 +48,6 @@ void setup() {
   Serial.println();
   
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
-  WiFiMulti.addAP("telemetry", "telemetry");
 
   maybeReconnect();
   determineNodeName();
@@ -60,8 +59,7 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
   attachInterrupt(PULSE_PIN, pulseStart, FALLING);
   attachInterrupt(PIR_PIN, recordMovement, RISING);
-
-  readAndReport.attach(REPORT_FREQUENCY, attemptSensorReadAndReport);
+  attemptSensorReadAndReport();
 }
 
 void error(int num) {
@@ -123,14 +121,18 @@ void report() {
   root["uptime"] = millis();
   root.printTo(stream);
 
-  if (http.POST(stream) == 200) {
+  int status = http.POST(stream);
+  if (status == 200) {
+    Serial.println("...success!");
     packetsSent++;
     movementCounter = 0;
     energyCounter = 0;
   } else {
+    Serial.println(status);
     Serial.println(http.getString());
     errorCounter++;
   }
+  Serial.println("end");
   
   http.end();
 }
@@ -138,6 +140,7 @@ void report() {
 void maybeReconnect() {
   while (WiFiMulti.run() != WL_CONNECTED) {
     Serial.println("(Re)connecting...");
+    delay(1000);
   }
   Serial.print("connected, got IP: ");
   Serial.println(WiFi.localIP());
@@ -156,6 +159,7 @@ void determineNodeName() {
 }
 
 void attemptSensorReadAndReport() {
+  readAndReport.detach();
   sensors.begin();
   int tries = 0;
   bool success = false;
@@ -176,5 +180,6 @@ void attemptSensorReadAndReport() {
     errorCounter++;
     error(tries);
   }
+  readAndReport.attach(REPORT_FREQUENCY, attemptSensorReadAndReport);
 }
 
