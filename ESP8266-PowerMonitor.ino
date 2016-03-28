@@ -74,6 +74,8 @@ void error(int num) {
 }
 
 void loop() {
+  delay(REPORT_FREQUENCY * 1000);
+  attemptSensorReadAndReport();
 }
 
 void recordMovement() {
@@ -120,6 +122,7 @@ void report() {
   root["packetsSent"] = packetsSent;
   root["uptime"] = millis();
   root.printTo(stream);
+  Serial.println(stream);
 
   int status = http.POST(stream);
   if (status == 200) {
@@ -159,7 +162,6 @@ void determineNodeName() {
 }
 
 void attemptSensorReadAndReport() {
-  readAndReport.detach();
   sensors.begin();
   int tries = 0;
   bool success = false;
@@ -180,6 +182,5 @@ void attemptSensorReadAndReport() {
     errorCounter++;
     error(tries);
   }
-  readAndReport.attach(REPORT_FREQUENCY, attemptSensorReadAndReport);
 }
 
