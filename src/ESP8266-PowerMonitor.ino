@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include <ArduinoJson.h>
 #include <Ticker.h>
 #include <DallasTemperature.h>
