@@ -48,7 +48,11 @@ void maybeReconnect();
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  
+  Serial.print("Built on ");
+  Serial.print(__DATE__);
+  Serial.print(" ");
+  Serial.println(__TIME__);
+  Serial.println("Starting up.");
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
 
   maybeReconnect();
@@ -111,6 +115,7 @@ void report() {
   temperature = sensors.getTempCByIndex(0);
 
   HTTPClient http;
+  http.setUserAgent(String("ESP8266-PowerMonitor") + __DATE__ + __TIME__);
   http.begin(String(API_ENDPOINT) + nodeName);
   String stream;
   StaticJsonBuffer<200> buffer;
@@ -138,7 +143,7 @@ void report() {
     errorCounter++;
   }
   Serial.println("end");
-  
+
   http.end();
 }
 
@@ -147,7 +152,9 @@ void maybeReconnect() {
     Serial.println("(Re)connecting...");
     delay(1000);
   }
-  Serial.print("connected, got IP: ");
+  Serial.print("connected to: ");
+  Serial.println(WiFi.BSSIDstr());
+  Serial.print("IP: ");
   Serial.println(WiFi.localIP());
 }
 
@@ -185,4 +192,3 @@ void attemptSensorReadAndReport() {
     error(tries);
   }
 }
-
