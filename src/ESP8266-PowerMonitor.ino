@@ -8,6 +8,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266mDNS.h>
+#include <PubSubClient.h>
 #include "IPAddress.h"
 #include "settings.h"
 #include "string.h"
@@ -25,6 +26,8 @@ OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 Ticker readAndReport;
 ESP8266WiFiMulti WiFiMulti;
+WiFiClient client;
+PubSubClient mqtt(client);
 
 String nodeName;
 int movementCounter;
@@ -57,6 +60,9 @@ void setup() {
 
   maybeReconnect();
   determineNodeName();
+#ifdef MQTT_SERVER
+  mqtt.setServer(MQTT_SERVER, MQTT_PORT);
+#endif
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(PIR_PIN, INPUT);
@@ -145,11 +151,20 @@ void report() {
   Serial.println("end");
 
   http.end();
+
+#ifdef MQTT_SERVER
+  if (mqtt.connect("ESP8266-PowerMonitor")) {
+    String topic = "/devices/" + nodeName;
+    mqtt.publish(topic.c_str(), stream.c_str());
+    mqtt.disconnect();
+  }
+#endif
 }
 
 void maybeReconnect() {
   while (WiFiMulti.run() != WL_CONNECTED) {
-    Serial.println("(Re)connecting...");
+    Serial.print("(Re)connecting to: ");
+    Serial.println(WIFI_SSID);
     delay(1000);
   }
   Serial.print("connected to: ");
