@@ -153,9 +153,12 @@ void report() {
   http.end();
 
 #ifdef MQTT_SERVER
-  if (mqtt.connect("ESP8266-PowerMonitor")) {
+  if (mqtt.connect(nodeName.c_str())) {
     String topic = "/devices/" + nodeName;
-    mqtt.publish(topic.c_str(), stream.c_str());
+    Serial.println("Publishing to " + topic);
+    if (mqtt.publish(topic.c_str(), stream.c_str())) {
+      Serial.println("Published successfully.");
+    }
     mqtt.disconnect();
   }
 #endif
