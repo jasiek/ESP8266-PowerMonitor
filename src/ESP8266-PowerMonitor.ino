@@ -104,7 +104,7 @@ void pulseStart() {
 void pulseEnd() {
   unsigned long now = millis();
   pulseWidth = now - pulseStartTime;
-  if (pulseWidth > METER_PULSE_WIDTH - 15 && pulseWidth < METER_PULSE_WIDTH + 15) {
+  if (pulseWidth > METER_PULSE_WIDTH - 10 && pulseWidth < METER_PULSE_WIDTH + 10) {
     // workaround?
     energyCounter++;
   }
@@ -128,7 +128,7 @@ void report() {
   JsonObject& root = buffer.createObject();
   root["temperature"] = temperature;
   root["movementCounter"] = movementCounter;
-  root["energyCounter"] = 1.0f * energyCounter / PULSE_PER_WH;
+  root["energyCounter"] = energyCounter;
   root["errorCounter"] = errorCounter;
   root["voltage"] = voltage;
   root["rssi"] = rssi;
