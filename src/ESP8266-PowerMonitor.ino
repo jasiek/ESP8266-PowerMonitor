@@ -88,6 +88,7 @@ void error(int num) {
 void loop() {
   delay(REPORT_FREQUENCY * 1000);
   attemptSensorReadAndReport();
+  ESP.restart();
 }
 
 void recordMovement() {
