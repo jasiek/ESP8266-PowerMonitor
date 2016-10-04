@@ -71,7 +71,6 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
   attachInterrupt(PULSE_PIN, pulseStart, FALLING);
   attachInterrupt(PIR_PIN, recordMovement, RISING);
-  attemptSensorReadAndReport();
 }
 
 void error(int num) {
