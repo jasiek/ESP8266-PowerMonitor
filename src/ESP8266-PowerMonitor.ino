@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 #include <ArduinoJson.h>
-#include <Ticker.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
@@ -24,7 +23,6 @@ ADC_MODE(ADC_VCC);
 
 OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
-Ticker readAndReport;
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient client;
 PubSubClient mqtt(client);
@@ -56,13 +54,8 @@ void setup() {
   Serial.print(" ");
   Serial.println(__TIME__);
   Serial.println("Starting up.");
-  WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
 
-  maybeReconnect();
-  determineNodeName();
-#ifdef MQTT_SERVER
-  mqtt.setServer(MQTT_SERVER, MQTT_PORT);
-#endif
+  // Set up sensors, interrupts, etc.
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
   pinMode(PIR_PIN, INPUT);
@@ -71,6 +64,14 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
   attachInterrupt(PULSE_PIN, pulseStart, FALLING);
   attachInterrupt(PIR_PIN, recordMovement, RISING);
+
+  WiFi.setOutputPower(20.5); // Set output power to max, see if it helps.
+  WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
+  maybeReconnect();
+  determineNodeName();
+#ifdef MQTT_SERVER
+  mqtt.setServer(MQTT_SERVER, MQTT_PORT);
+#endif
 }
 
 void error(int num) {
@@ -85,9 +86,13 @@ void error(int num) {
 }
 
 void loop() {
-  delay(REPORT_FREQUENCY * 1000);
+  int cycles = REPORT_FREQUENCY;
+  while (cycles > 0) {
+    Serial.print("Measuring. Seconds left: ");
+    Serial.println(cycles--);
+    delay(1000);
+  }
   attemptSensorReadAndReport();
-  ESP.restart();
 }
 
 void recordMovement() {
@@ -165,6 +170,7 @@ void report() {
 }
 
 void maybeReconnect() {
+  WiFi.reconnect();
   while (WiFiMulti.run() != WL_CONNECTED) {
     Serial.print("(Re)connecting to: ");
     Serial.println(WIFI_SSID);
