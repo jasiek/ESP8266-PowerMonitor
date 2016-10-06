@@ -53,6 +53,8 @@ void setup() {
   Serial.print(__DATE__);
   Serial.print(" ");
   Serial.println(__TIME__);
+  Serial.print("Git revision: ");
+  Serial.println(GIT_REVISION);
   Serial.println("Starting up.");
 
   // Set up sensors, interrupts, etc.
@@ -127,7 +129,7 @@ void report() {
   temperature = sensors.getTempCByIndex(0);
 
   HTTPClient http;
-  http.setUserAgent(String("ESP8266-PowerMonitor") + __DATE__ + __TIME__);
+  http.setUserAgent(String("ESP8266-PowerMonitor") + __DATE__ + __TIME__ + "(" + GIT_REVISION + ")");
   http.begin(String(API_ENDPOINT) + nodeName);
   String stream;
   StaticJsonBuffer<200> buffer;
