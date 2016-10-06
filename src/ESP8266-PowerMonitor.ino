@@ -67,8 +67,6 @@ void setup() {
 
   WiFi.setOutputPower(20.5); // Set output power to max, see if it helps.
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
-  maybeReconnect();
-  determineNodeName();
 #ifdef MQTT_SERVER
   mqtt.setServer(MQTT_SERVER, MQTT_PORT);
 #endif
@@ -92,7 +90,10 @@ void loop() {
     Serial.println(cycles--);
     delay(1000);
   }
+  maybeReconnect();
+  determineNodeName();
   attemptSensorReadAndReport();
+  ESP.restart();
 }
 
 void recordMovement() {
