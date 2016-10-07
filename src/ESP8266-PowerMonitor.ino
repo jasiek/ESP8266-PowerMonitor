@@ -90,6 +90,10 @@ void loop() {
   while (cycles > 0) {
     Serial.print("Measuring. Seconds left: ");
     Serial.println(cycles--);
+    if (cycles % 30 == 0) {
+      Serial.print("Pulse width: ");
+      Serial.println(pulseWidth);
+    }
     delay(1000);
   }
   maybeReconnect();
