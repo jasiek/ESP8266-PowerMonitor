@@ -168,7 +168,7 @@ void report() {
   if (mqtt.connect(nodeName.c_str())) {
     String topic = "/devices/" + nodeName;
     Serial.println("Publishing to " + topic);
-    if (mqtt.publish(topic.c_str(), stream.c_str())) {
+    if (mqtt.publish(topic.c_str(), stream.c_str(), true)) {
       Serial.println("Published successfully.");
     }
     mqtt.disconnect();
