@@ -5,11 +5,10 @@
 #include <OneWire.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <ESP8266HTTPClient.h>
 #include <ESP8266mDNS.h>
 #include <PubSubClient.h>
+#include <FS.h>
 #include "IPAddress.h"
-#include "settings.h"
 #include "string.h"
 
 #define PULSE_PIN 2
@@ -38,6 +37,12 @@ float voltage;
 float temperature;
 int rssi;
 
+String WIFI_SSID;
+String WIFI_PASS;
+String MQTT_SERVER;
+int MQTT_PORT;
+int METER_PULSE_WIDTH;
+
 void pulseStart();
 void pulseEnd();
 void determineNodeName();
@@ -45,6 +50,39 @@ void recordMovement();
 void report();
 void attemptSensorReadAndReport();
 void maybeReconnect();
+
+void readConfiguration() {
+  StaticJsonBuffer<200> buffer;
+  char readFileBuffer[200];
+  if (!SPIFFS.begin()) {
+    Serial.println("SPIFFS could not be accessed");
+    return;
+  }
+
+  File f = SPIFFS.open("/config.json", "r");
+
+  if (!f) {
+    Serial.println("Opening config.json failed");
+    return;
+  }
+
+  Serial.println(f.readBytes(readFileBuffer, 200));
+  Serial.println(readFileBuffer);
+  JsonObject &root = buffer.parse(readFileBuffer);
+
+  if (!root.success()) {
+    Serial.println("Parsing config.json failed");
+    return;
+  }
+
+  WIFI_SSID = root["wifi_ssid"].asString();
+  WIFI_PASS = root["wifi_pass"].asString();
+  MQTT_SERVER = root["mqtt_server"].asString();
+  MQTT_PORT = root["mqtt_port"].as<int>();
+  METER_PULSE_WIDTH = root["meter_pulse_width"].as<int>();
+
+  SPIFFS.end();
+}
 
 void setup() {
   Serial.begin(115200);
@@ -57,6 +95,8 @@ void setup() {
   Serial.println(GIT_REVISION);
   Serial.println("Starting up.");
 
+  readConfiguration();
+
   // Set up sensors, interrupts, etc.
   // When there's a pulse, increment the counter.
   pulseStartTime = millis();
@@ -68,10 +108,8 @@ void setup() {
   attachInterrupt(PIR_PIN, recordMovement, RISING);
 
   WiFi.setOutputPower(20.5); // Set output power to max, see if it helps.
-  WiFiMulti.addAP(WIFI_SSID, WIFI_PASS);
-#ifdef MQTT_SERVER
-  mqtt.setServer(MQTT_SERVER, MQTT_PORT);
-#endif
+  WiFiMulti.addAP(WIFI_SSID.c_str(), WIFI_PASS.c_str());
+  mqtt.setServer(MQTT_SERVER.c_str(), MQTT_PORT);
 }
 
 void error(int num) {
@@ -132,9 +170,6 @@ void report() {
   rssi = WiFi.RSSI();
   temperature = sensors.getTempCByIndex(0);
 
-  HTTPClient http;
-  http.setUserAgent(String("ESP8266-PowerMonitor") + __DATE__ + __TIME__ + "(" + GIT_REVISION + ")");
-  http.begin(String(API_ENDPOINT) + nodeName);
   String stream;
   StaticJsonBuffer<200> buffer;
   JsonObject& root = buffer.createObject();
@@ -149,22 +184,6 @@ void report() {
   root.printTo(stream);
   Serial.println(stream);
 
-  int status = http.POST(stream);
-  if (status == 200) {
-    Serial.println("...success!");
-    packetsSent++;
-    movementCounter = 0;
-    energyCounter = 0;
-  } else {
-    Serial.println(status);
-    Serial.println(http.getString());
-    errorCounter++;
-  }
-  Serial.println("end");
-
-  http.end();
-
-#ifdef MQTT_SERVER
   if (mqtt.connect(nodeName.c_str())) {
     String topic = "/devices/" + nodeName;
     Serial.println("Publishing to " + topic);
@@ -173,7 +192,6 @@ void report() {
     }
     mqtt.disconnect();
   }
-#endif
 }
 
 void maybeReconnect() {

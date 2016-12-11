@@ -1,7 +1,0 @@
-#define WIFI_SSID "telemetry"
-#define WIFI_PASS "telemetry"
-
-#define METER_PULSE_WIDTH 80
-#define PULSE_PER_WH 2
-
-#define API_ENDPOINT "http://where.to.post/json/"
