@@ -184,7 +184,9 @@ void report() {
   root.printTo(stream);
   Serial.println(stream);
 
-  if (mqtt.connect(nodeName.c_str())) {
+  String clientName = "ESP8266-PowerMonitor " + nodeName;
+  
+  if (mqtt.connect(clientName.c_str())) {
     String topic = "/devices/" + nodeName;
     Serial.println("Publishing to " + topic);
     if (mqtt.publish(topic.c_str(), stream.c_str(), true)) {
