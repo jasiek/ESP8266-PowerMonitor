@@ -18,7 +18,6 @@ ADC_MODE(ADC_VCC);
 OneWire bus(ONEWIRE_PIN); // Use GPIO4 as it is not connected to any peripherals
 DallasTemperature sensors(&bus);
 
-String nodeName;
 int movementCounter;
 int energyCounter;
 int errorCounter;
@@ -28,8 +27,7 @@ unsigned long packetsSent;
 float voltage;
 float temperature;
 
-
-int METER_PULSE_WIDTH;
+int METER_PULSE_WIDTH = 35;
 
 void pulseStart();
 void pulseEnd();
