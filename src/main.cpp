@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <FS.h>
@@ -12,6 +13,7 @@
 #define LED_PIN 16
 // Report frequency is in seconds
 #define REPORT_FREQUENCY 300
+#define BUFFER_SIZE 1024
 
 ADC_MODE(ADC_VCC);
 
@@ -27,7 +29,7 @@ unsigned long packetsSent;
 float voltage;
 float temperature;
 
-int METER_PULSE_WIDTH = 35;
+int METER_PULSE_WIDTH = 90;
 
 void pulseStart();
 void pulseEnd();
@@ -120,8 +122,24 @@ void attemptSensorReadAndReport() {
   if (success) {
     sensors.setResolution(12);
     sensors.requestTemperatures();
-      temperature = sensors.getTempCByIndex(0);
-    network::report(temperature, NAN, NAN, ESP.getVcc() / 1000);
+    temperature = sensors.getTempCByIndex(0);
+
+    StaticJsonBuffer<BUFFER_SIZE> json;
+    JsonObject &root = json.createObject();
+
+    if (!isnan(temperature)) {
+      root["temperature"] = temperature;
+    }
+    root["energyCounter"] = energyCounter;
+    root["movementCounter"] = movementCounter;
+    root["errorCounter"] = errorCounter;
+    root["uptime"] = millis();
+    root["rssi"] = WiFi.RSSI();
+
+    String stream;
+    Serial.println(stream);
+    root.printTo(stream);
+    network::report(stream);
   } else {
     errorCounter++;
   }
