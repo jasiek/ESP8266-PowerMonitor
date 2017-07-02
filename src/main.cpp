@@ -29,8 +29,6 @@ unsigned long packetsSent;
 float voltage;
 float temperature;
 
-int METER_PULSE_WIDTH = 90;
-
 void pulseStart();
 void pulseEnd();
 void determineNodeName();
@@ -143,8 +141,4 @@ void attemptSensorReadAndReport() {
   } else {
     errorCounter++;
   }
-}
-
-void messageReceived(String topic, String payload, char * bytes, unsigned int length) {
-  network::mqtt_message_received_cb(topic, payload, bytes, length);
 }
