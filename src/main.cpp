@@ -122,7 +122,7 @@ void attemptSensorReadAndReport() {
     sensors.requestTemperatures();
     temperature = sensors.getTempCByIndex(0);
 
-    StaticJsonBuffer<BUFFER_SIZE> json;
+    DynamicJsonBuffer json;
     JsonObject &root = json.createObject();
 
     if (!isnan(temperature)) {
