@@ -112,6 +112,7 @@ void attemptSensorReadAndReport() {
   while (tries < 10) {
     success = sensors.getDeviceCount() > 0;
     if (success) break;
+    M_DEBUG("Attempting to read sensor...");
     delay(500);
     sensors.begin();
     tries++;
@@ -133,12 +134,17 @@ void attemptSensorReadAndReport() {
     root["errorCounter"] = errorCounter;
     root["uptime"] = millis();
     root["rssi"] = WiFi.RSSI();
+    uint32 t = time::get_current();
+    if (t > 0) {
+      root["timestamp"] = t;
+    }
 
     String stream;
     Serial.println(stream);
     root.printTo(stream);
     network::report(stream);
   } else {
+    M_DEBUG("Could not read sensor.");
     errorCounter++;
   }
 }
