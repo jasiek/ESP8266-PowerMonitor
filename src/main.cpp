@@ -4,6 +4,7 @@
 #include <OneWire.h>
 #include <FS.h>
 #include <metering.h>
+#include <time.h>
 #include "IPAddress.h"
 #include "string.h"
 
@@ -83,21 +84,21 @@ void loop() {
   ESP.restart();
 }
 
-void recordMovement() {
+void ICACHE_RAM_ATTR recordMovement() {
   movementCounter++;
 }
 
-void pulseStart() {
+void ICACHE_RAM_ATTR pulseStart() {
   // are we rising or falling?
   unsigned long now = millis();
   pulseStartTime = now;
   attachInterrupt(PULSE_PIN, pulseEnd, RISING);
 }
 
-void pulseEnd() {
+void ICACHE_RAM_ATTR  pulseEnd() {
   unsigned long now = millis();
   pulseWidth = now - pulseStartTime;
-  if (pulseWidth > METER_PULSE_WIDTH - 10 && pulseWidth < METER_PULSE_WIDTH + 10) {
+  if (pulseWidth > 20 && pulseWidth < 90) {
     // workaround?
     energyCounter++;
   }
@@ -134,7 +135,7 @@ void attemptSensorReadAndReport() {
     root["errorCounter"] = errorCounter;
     root["uptime"] = millis();
     root["rssi"] = WiFi.RSSI();
-    uint32 t = time::get_current();
+    uint32 t = time(NULL);
     if (t > 0) {
       root["timestamp"] = t;
     }
