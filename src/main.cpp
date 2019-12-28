@@ -76,12 +76,13 @@ void loop() {
     if (cycles % 30 == 0) {
       Serial.print("Pulse width: ");
       Serial.println(pulseWidth);
+      Serial.print("Pulses counted: ");
+      Serial.println(energyCounter);
     }
     delay(1000);
   }
 
   attemptSensorReadAndReport();
-  ESP.restart();
 }
 
 void ICACHE_RAM_ATTR recordMovement() {
