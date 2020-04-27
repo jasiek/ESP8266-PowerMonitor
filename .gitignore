@@ -3,3 +3,8 @@
 .gcc-flags.json
 src/settings.h
 .piolibdeps
+.*/
+.*
+\#*
+
+
