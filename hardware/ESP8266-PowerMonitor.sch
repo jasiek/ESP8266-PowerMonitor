@@ -237,7 +237,7 @@ F 3 "~" H 8200 3250 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	7450 3250 8050 3250
+	7450 3250 7750 3250
 Wire Wire Line
 	8350 3250 8800 3250
 Connection ~ 8800 3250
@@ -246,7 +246,7 @@ L Device:R R3
 U 1 1 5EA1E8A4
 P 7750 5400
 F 0 "R3" H 7820 5446 50  0000 L CNN
-F 1 "470" H 7820 5355 50  0000 L CNN
+F 1 "470" V 7750 5350 50  0000 L CNN
 F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 7680 5400 50  0001 C CNN
 F 3 "~" H 7750 5400 50  0001 C CNN
 	1    7750 5400
@@ -257,16 +257,10 @@ Wire Wire Line
 Wire Wire Line
 	7750 5550 7750 5700
 Wire Wire Line
-	7750 5250 7750 3450
-Wire Wire Line
-	7750 3450 7450 3450
-Wire Wire Line
 	7650 5700 7650 4900
 Connection ~ 7650 4900
 Wire Wire Line
 	7650 4900 8800 4900
-Wire Wire Line
-	7450 3550 7550 3550
 $Comp
 L Converter_ACDC:HLK-PM03 PS1
 U 1 1 5EA0B50B
@@ -291,8 +285,6 @@ Wire Wire Line
 Wire Wire Line
 	3450 4000 3600 4000
 Connection ~ 3600 4000
-Wire Wire Line
-	7550 1800 7550 3550
 $Comp
 L Device:C C3
 U 1 1 5EA34A36
@@ -419,8 +411,6 @@ NoConn ~ 6250 4050
 NoConn ~ 6250 4150
 NoConn ~ 7450 4050
 NoConn ~ 7450 3850
-NoConn ~ 7450 3750
-NoConn ~ 7450 3650
 Wire Wire Line
 	1700 7250 1450 7250
 Text GLabel 8900 2000 2    50   Input ~ 0
@@ -443,29 +433,82 @@ Wire Wire Line
 Wire Wire Line
 	8700 3650 8800 3650
 Connection ~ 8800 3650
-Wire Wire Line
-	7550 1800 8900 1800
-Text GLabel 10100 1800 2    50   Input ~ 0
+Text GLabel 3900 6200 2    50   Input ~ 0
 DS18B20_DQ
-Text GLabel 10100 1900 2    50   Input ~ 0
+Text GLabel 3900 6300 2    50   Input ~ 0
 GND
-Text GLabel 10100 2000 2    50   Input ~ 0
+Text GLabel 3900 6400 2    50   Input ~ 0
 +3.3V
 $Comp
 L Connector:Conn_01x03_Male J4
 U 1 1 5EA4E231
-P 9750 1900
-F 0 "J4" H 9858 2181 50  0000 C CNN
-F 1 "CONN_TEMP" H 9858 2090 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 9750 1900 50  0001 C CNN
-F 3 "~" H 9750 1900 50  0001 C CNN
-	1    9750 1900
+P 3550 6300
+F 0 "J4" H 3658 6581 50  0000 C CNN
+F 1 "CONN_TEMP" H 3658 6490 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3550 6300 50  0001 C CNN
+F 3 "~" H 3550 6300 50  0001 C CNN
+	1    3550 6300
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	10100 1800 9950 1800
+	3900 6200 3750 6200
 Wire Wire Line
-	9950 1900 10100 1900
+	3750 6300 3900 6300
 Wire Wire Line
-	10100 2000 9950 2000
+	3900 6400 3750 6400
+Text GLabel 9350 2400 2    50   Input ~ 0
+SDA
+Text GLabel 9350 2500 2    50   Input ~ 0
+SCL
+Wire Wire Line
+	9350 2500 7800 2500
+Wire Wire Line
+	7800 2500 7800 3550
+Wire Wire Line
+	7800 3550 7450 3550
+Wire Wire Line
+	9350 2400 7700 2400
+Wire Wire Line
+	7700 2400 7700 3450
+Wire Wire Line
+	7700 3450 7450 3450
+Wire Wire Line
+	7600 3650 7600 1800
+Wire Wire Line
+	7600 1800 8900 1800
+Wire Wire Line
+	7600 3650 7450 3650
+Text GLabel 3900 6800 2    50   Input ~ 0
++3.3V
+Text GLabel 3900 7000 2    50   Input ~ 0
+SDA
+Text GLabel 3900 6900 2    50   Input ~ 0
+SCL
+Text GLabel 3900 7100 2    50   Input ~ 0
+GND
+$Comp
+L Connector:Conn_01x04_Male J5
+U 1 1 5EAA8055
+P 3400 6900
+F 0 "J5" H 3508 7181 50  0000 C CNN
+F 1 "CONN_I2C" H 3508 7090 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 3400 6900 50  0001 C CNN
+F 3 "~" H 3400 6900 50  0001 C CNN
+	1    3400 6900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3600 6800 3900 6800
+Wire Wire Line
+	3900 7100 3600 7100
+Wire Wire Line
+	7750 5250 7750 3250
+Connection ~ 7750 3250
+Wire Wire Line
+	7750 3250 8050 3250
+NoConn ~ 7450 3750
+Wire Wire Line
+	3900 6900 3600 6900
+Wire Wire Line
+	3600 7000 3900 7000
 $EndSCHEMATC

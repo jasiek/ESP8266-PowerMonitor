@@ -1,4 +1,4 @@
-update=Thursday, 23 April 2020 at 09:53:08
+update=Monday, 27 April 2020 at 09:39:13
 version=1
 last_client=kicad
 [cvpcb]
@@ -36,8 +36,8 @@ MinMicroViaDiameter=0.2
 MinMicroViaDrill=0.09999999999999999
 MinHoleToHole=0.25
 TrackWidth1=0.4
-ViaDiameter1=0.6
-ViaDrill1=0.4
+ViaDiameter1=1.3
+ViaDrill1=0.5
 dPairWidth1=0.2
 dPairGap1=0.25
 dPairViaGap1=0.25
@@ -64,7 +64,7 @@ OthersTextUpright=1
 SolderMaskClearance=0.2
 SolderMaskMinWidth=0
 SolderPasteClearance=0
-SolderPasteRatio=0
+SolderPasteRatio=-0
 [pcbnew/Layer.F.Cu]
 Name=F.Cu
 Type=0
@@ -236,14 +236,25 @@ Enabled=0
 Name=Default
 Clearance=0.2
 TrackWidth=0.4
-ViaDiameter=0.6
-ViaDrill=0.4
+ViaDiameter=1.3
+ViaDrill=0.5
 uViaDiameter=0.3
 uViaDrill=0.1
 dPairWidth=0.2
 dPairGap=0.25
 dPairViaGap=0.25
 [pcbnew/Netclasses/1]
+Name=AC
+Clearance=1
+TrackWidth=1
+ViaDiameter=1.3
+ViaDrill=0.5
+uViaDiameter=0.3
+uViaDrill=0.1
+dPairWidth=0.2
+dPairGap=0.25
+dPairViaGap=0.25
+[pcbnew/Netclasses/2]
 Name=Copper Outline
 Clearance=0.2
 TrackWidth=0.2
@@ -254,7 +265,7 @@ uViaDrill=0.1
 dPairWidth=0.2
 dPairGap=0.25
 dPairViaGap=0.25
-[pcbnew/Netclasses/2]
+[pcbnew/Netclasses/3]
 Name=Outline
 Clearance=0.2
 TrackWidth=0.2
