@@ -236,11 +236,6 @@ F 3 "~" H 8200 3250 50  0001 C CNN
 	1    8200 3250
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	7450 3250 7750 3250
-Wire Wire Line
-	8350 3250 8800 3250
-Connection ~ 8800 3250
 $Comp
 L Device:R R3
 U 1 1 5EA1E8A4
@@ -433,9 +428,9 @@ Wire Wire Line
 Wire Wire Line
 	8700 3650 8800 3650
 Connection ~ 8800 3650
-Text GLabel 3900 6200 2    50   Input ~ 0
-DS18B20_DQ
 Text GLabel 3900 6300 2    50   Input ~ 0
+DS18B20_DQ
+Text GLabel 3900 6200 2    50   Input ~ 0
 GND
 Text GLabel 3900 6400 2    50   Input ~ 0
 +3.3V
@@ -450,12 +445,6 @@ F 3 "~" H 3550 6300 50  0001 C CNN
 	1    3550 6300
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3900 6200 3750 6200
-Wire Wire Line
-	3750 6300 3900 6300
-Wire Wire Line
-	3900 6400 3750 6400
 Text GLabel 9350 2400 2    50   Input ~ 0
 SDA
 Text GLabel 9350 2500 2    50   Input ~ 0
@@ -473,18 +462,18 @@ Wire Wire Line
 Wire Wire Line
 	7700 3450 7450 3450
 Wire Wire Line
-	7600 3650 7600 1800
+	7600 3650 7600 2000
 Wire Wire Line
 	7600 1800 8900 1800
 Wire Wire Line
 	7600 3650 7450 3650
 Text GLabel 3900 6800 2    50   Input ~ 0
 +3.3V
-Text GLabel 3900 7000 2    50   Input ~ 0
-SDA
-Text GLabel 3900 6900 2    50   Input ~ 0
-SCL
 Text GLabel 3900 7100 2    50   Input ~ 0
+SDA
+Text GLabel 3900 7000 2    50   Input ~ 0
+SCL
+Text GLabel 3900 6900 2    50   Input ~ 0
 GND
 $Comp
 L Connector:Conn_01x04_Male J5
@@ -500,15 +489,47 @@ $EndComp
 Wire Wire Line
 	3600 6800 3900 6800
 Wire Wire Line
-	3900 7100 3600 7100
+	8800 3250 8350 3250
+Connection ~ 8800 3250
 Wire Wire Line
-	7750 5250 7750 3250
-Connection ~ 7750 3250
+	7750 5250 7750 3750
 Wire Wire Line
-	7750 3250 8050 3250
-NoConn ~ 7450 3750
+	7750 3750 7450 3750
 Wire Wire Line
-	3900 6900 3600 6900
+	8050 3250 7750 3250
 Wire Wire Line
-	3600 7000 3900 7000
+	7750 3250 7750 3750
+Connection ~ 7750 3750
+Wire Wire Line
+	3900 6200 3750 6200
+Wire Wire Line
+	3750 6300 3900 6300
+Wire Wire Line
+	3900 6400 3750 6400
+Wire Wire Line
+	3600 6900 3900 6900
+Wire Wire Line
+	3900 7000 3600 7000
+Wire Wire Line
+	3600 7100 3900 7100
+$Comp
+L Device:R R7
+U 1 1 5ECB0601
+P 8150 2000
+F 0 "R7" V 7943 2000 50  0000 C CNN
+F 1 "4.7k" V 8034 2000 50  0000 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 8080 2000 50  0001 C CNN
+F 3 "~" H 8150 2000 50  0001 C CNN
+	1    8150 2000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	8300 2000 8800 2000
+Connection ~ 8800 2000
+Wire Wire Line
+	8000 2000 7600 2000
+Connection ~ 7600 2000
+Wire Wire Line
+	7600 2000 7600 1800
+NoConn ~ 7450 3250
 $EndSCHEMATC
