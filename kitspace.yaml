@@ -1,1 +1,3 @@
+summary: ESP8266-based power monitor (pulse counter) with ESPEasy/HomeAssistant compatiblity
+site: https://github.com/jasiek/ESP8266-PowerMonitor
 bom: hardware/1-click-bom.tsv

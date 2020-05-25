@@ -1,18 +1,18 @@
-References	Qty
-C1	1
-C2	1
-C3	1
-F1	1
-J1	1
-J2	1
-J3	1
-J4	1
-J5	1
-JP1	1
-PS1	1
-R1, R2, R4, R5, R6	5
-R3	1
-R7	1
-SW1	1
-U1	1
-U2	1
+References	Qty	Description
+C1	1	C 0.1uF Unpolarized capacitor 1206 3216Metric Pad1.42x1.75mm HandSolder
+C2	1	CP 10uF Polarized capacitor Elec 4x5.3
+C3	1	C 100nF Unpolarized capacitor 1206 3216Metric Pad1.42x1.75mm HandSolder
+F1	1	Polyfuse 100mA Resettable fuse, polymeric positive temperature coefficient Fuse 1206 3216Metric Pad1.42x1.75mm HandSolder
+J1	1	Conn 01x02 Male CONN PULSE Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/) PinHeader 1x02 P2.54mm Vertical
+J2	1	Conn 01x05 Male CONN PROG Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/) PinHeader 1x05 P2.54mm Vertical
+J3	1	Conn 01x02 Male CONN AC Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/) TerminalBlock bornier-2 P5.08mm
+J4	1	Conn 01x03 Male CONN TEMP Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/) PinHeader 1x03 P2.54mm Vertical
+J5	1	Conn 01x04 Male CONN I2C Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/) PinHeader 1x04 P2.54mm Vertical
+JP1	1	SolderJumper 2 Open 3.3V BYPASS Solder Jumper, 2-pole, open SolderJumper-2 P1.3mm TrianglePad1.0x1.5mm
+PS1	1	HLK-PM03 Compact AC/DC board mount power module 3W 5V Converter ACDC HiLink HLK-PMxx
+R1, R2, R4, R6, R5	5	R 10k Resistor 1206 3216Metric Pad1.42x1.75mm HandSolder
+R3	1	R 470 Resistor 1206 3216Metric Pad1.42x1.75mm HandSolder
+R7	1	R 4.7k Resistor 1206 3216Metric Pad1.42x1.75mm HandSolder
+SW1	1	SW DIP x01 RESET 1x Switch, Single Pole Throw (SPST) switch, small symbol Push 1P1T NO 6x6mm H9.5mm
+U1	1	AMS1117-3.3 1A Low Dropout regulator, positive, 1.5V fixed output, SOT-223 SOT-223-3 TabPin2
+U2	1	ESP-12F 802.11 b/g/n Wi-Fi Module ESP-12E
