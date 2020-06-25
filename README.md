@@ -1,6 +1,6 @@
 # ESP8266-PowerMonitor
 
-<button>Order on PCBWay</button>
+Order PCB via <a href="https://www.pcbway.com/QuickOrderOnline.aspx?fileurl=https://kitspace.org/boards/github.com/jasiek/ESP8266-PowerMonitor/ESP8266-PowerMonitor-224c868-gerbers.zip&from=kitspace"><img src="https://kitspace.org/images/pcbway.png"></a>
 
 Uses [Lets Control It/ESP Easy](https://www.letscontrolit.com/).
 
